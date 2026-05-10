@@ -1,0 +1,26 @@
+
+# documentation: https://github.com/michaelmunson/scripting/blob/main/x/README.md#app-framework
+# examples:      https://github.com/michaelmunson/scripting/blob/main/x/examples/app/exapp.x.yml
+
+name: cad
+version: 0.0.0
+description: an x app
+
+options: &options
+  - '[--name=<name>]'
+
+commands:
+  build:
+    description: build a project
+    arguments: '[<directory>]'
+    options: *options
+
+$:
+  build: |
+    directory=$(x-arg "directory")
+    echo "building $directory"
+    for i in $(find "${directory:-.}" -type f -name "*.scad"); do
+      stl="${i%.scad}.stl"
+      echo "Converting $i -> $stl"
+      openscad -o "$stl" "$i"
+    done
