@@ -15,9 +15,9 @@
 /* [Planform] */
 root_chord       = 80;     // chord at the root (mm)
 tip_chord        = 35;     // chord at the tip - clipped, not pointed (mm)
-span             = 45;     // root-to-tip distance (mm)
+span             = 44;     // root-to-tip distance (mm)
 
-leading_sweep    = 60;     // LE sweep angle (deg)
+leading_sweep    = 44;     // LE sweep angle (deg)
 trailing_sweep   = 3;      // small forward sweep on TE (deg, 0 = square)
 
 /* [Airfoil - symmetric hexagonal / double-wedge] */
