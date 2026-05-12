@@ -1,0 +1,31 @@
+{
+    "parameterSets": {
+        "design default values15": {
+            "$fn": "64",
+            "body_tube_id": "74",
+            "body_tube_od": "76.2",
+            "clearance": "0.35",
+            "m2_mount_hole_d": "2",
+            "m2_mount_hole_spacing": "2.5",
+            "mid_band_len": "40",
+            "outer_mount_keep": "3",
+            "pocket_clearance": "0.6",
+            "pocket_into_bore": "72",
+            "servo_azimuth_offset": "0",
+            "servo_output_z_offset_from_body_center": "0",
+            "sg90_case_radial": "22.8",
+            "sg90_case_w": "12.5",
+            "sg90_case_z": "22.4",
+            "sg90_hole_spacing": "22.5",
+            "shoulder_bot_len": "15",
+            "shoulder_top_len": "35",
+            "wall_thickness": "5",
+            "wire_hole_azimuth": "45",
+            "wire_hole_d": "8",
+            "wire_hole_enable": "true",
+            "wire_hole_z": "0"
+        }
+    },
+    "parameterSets": "",
+    "fileFormatVersion": "1"
+}
