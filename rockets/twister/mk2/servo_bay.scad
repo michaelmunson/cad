@@ -1,5 +1,5 @@
 /*
- * Twister mk1 — BT-80 SG90 servo coupler
+ * Twister mk2 — MT-3 SG90 servo coupler
  *
  * Stepped OD: upper/lower shoulders slip inside the body tube bore (ID − clearance);
  * the mid band is flush with the outside (OD) at the joint.
@@ -12,9 +12,9 @@
  */
 
 // ----- Body tube (caliper your stock)
-body_tube_od = 76.2;       // mm, nominal BT-80 outer diameter (3.00 in) — mid band flush outside
-body_tube_id = 74.0;       // mm, nominal BT-80 inner diameter — shoulder OD slip fit
-clearance = 0.35;          // mm subtracted from ID for shoulder OD (diameter slack)
+body_tube_od = 79.2;       // mm, nominal MT-3 outer diameter (77.6mm) — mid band flush outside
+body_tube_id = 76.2;       // mm, nominal MT-3 inner diameter (76.2)
+clearance = 0;             // mm subtracted from ID for shoulder OD (diameter slack)
 
 // ----- Shoulder lengths (glue overlap into each fuselage segment)
 shoulder_bot_len = 7;
@@ -24,7 +24,7 @@ shoulder_top_len = 7;
 mid_band_len = 40;
 
 // ----- Wall / bore (bore sized from mid-band OD so the thick ring has full wall)
-wall_thickness = 4;      // radial shell thickness in the mid band (room for M2 through wall)
+wall_thickness = 3.1;      // radial shell thickness in the mid band (room for M2 through wall)
 
 // ----- Servo orientation vs world +X (fin alignment offset)
 servo_azimuth_offset = 0; // degrees added to 0/90/180/270 placements
@@ -50,7 +50,7 @@ pocket_clearance = 0.6;
 outer_mount_keep = 3;
 
 // Into central bore: enough so radial case depth (22.8 mm) clears inner wall + clearance
-pocket_into_bore = 73;
+pocket_into_bore = 78;
 
 // Z position of servo spline vs geometric center of the pocket (align with calipers).
 servo_output_z_offset_from_body_center = 0;
@@ -142,3 +142,5 @@ difference() {
 
   wire_routing();
 }
+
+
