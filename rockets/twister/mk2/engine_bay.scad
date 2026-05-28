@@ -20,7 +20,7 @@ engine_len = 83;           // mm, motor case length
 
 // ----- Height split (outer profile; inner motor tube is full height)
 coupler_fraction = 0.8;    // coupler (mid band + shoulder) as share of total_h
-shoulder_coupler_len = 7;  // mm, glue overlap into fuselage bore
+shoulder_coupler_len = 68;  // mm, glue overlap into fuselage bore
 engine_sleeve_extra = 5;   // mm beyond motor length (nozzle / retention slack)
 motor_bore_min_len = engine_len + engine_sleeve_extra;
 total_h = motor_bore_min_len;
