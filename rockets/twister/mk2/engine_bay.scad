@@ -1,13 +1,12 @@
 /*
- * Twister mk2 — engine bay
+ * Twister mk2 — engine bay (lightweight)
  *
- * Stepped OD: coupler shoulder slips inside the body tube bore (ID − clearance);
- * the mid band is flush with the outside (OD) at the fuselage bottom joint.
- * Open engine sleeve (both ends) for a 29 mm × 83 mm motor; four radial bolt
- * holes in the coupler/mid band for fuselage retention.
+ * Inner engine tube + thin outer shell joined by radial ribs (no solid annulus).
+ * ~80% of height is coupler (OD mid band + shoulder into fuselage); ~20% is
+ * the short engine sleeve below — motor bore runs full height through both.
+ * Open engine sleeve both ends; four bolt holes through ribs + mid-band shell.
  *
- * Print: standing on the open engine end (nozzle down); supports only if needed
- * inside the engine bore.
+ * Print: nozzle end down; ribs along Z need no infill in a solid block.
  */
 
 // ----- Body tube (caliper your stock)
@@ -19,17 +18,24 @@ clearance = 0;             // mm subtracted from ID for shoulder OD (diameter sl
 engine_d = 29;             // mm, motor case OD
 engine_len = 83;           // mm, motor case length
 
-// ----- Shoulder / bands
+// ----- Height split (outer profile; inner motor tube is full height)
+coupler_fraction = 0.8;    // coupler (mid band + shoulder) as share of total_h
 shoulder_coupler_len = 7;  // mm, glue overlap into fuselage bore
-mid_band_len = 12;         // mm, OD flush with tube; bolt holes land here
 engine_sleeve_extra = 5;   // mm beyond motor length (nozzle / retention slack)
-engine_sleeve_len = engine_len + engine_sleeve_extra;
+motor_bore_min_len = engine_len + engine_sleeve_extra;
+total_h = motor_bore_min_len;
+coupler_len = coupler_fraction * total_h;
+engine_sleeve_len = total_h - coupler_len;
+mid_band_len = coupler_len - shoulder_coupler_len;
 
 // ----- Engine bore slack
 engine_clearance = 0.4;    // mm added to motor OD for slip fit
 
-// ----- Wall (mid band; engine sleeve uses full OD shell)
-wall_thickness = 3.1;      // mm radial shell in mid band (room for bolt through wall)
+// ----- Thin shells + ribs (print ≥1.2 mm walls on your printer)
+inner_wall_t = 1.6;        // mm, engine tube wall
+outer_wall_t = 1.6;        // mm, fuselage shell wall
+rib_count = 4;             // radial spokes; aligns with bolt pattern
+rib_width = 2.5;           // mm, tangential width of each rib at mid span
 
 // ----- Fuselage retention (four bolts, 0/90/180/270°)
 bolt_hole_d = 3.2;         // mm, M3 clearance; enlarge if binding in plastic
@@ -42,31 +48,44 @@ $fn = 64;
 shoulder_outer_r = (body_tube_id - clearance) / 2;
 middle_outer_r = body_tube_od / 2;
 engine_inner_r = (engine_d + engine_clearance) / 2;
-total_h = engine_sleeve_len + mid_band_len + shoulder_coupler_len;
-coupler_z0 = engine_sleeve_len;
-coupler_z1 = engine_sleeve_len + mid_band_len;
-bolt_z_center = (coupler_z0 + coupler_z1) / 2 + bolt_hole_z_offset;
-mount_r_mid = (engine_inner_r + middle_outer_r) / 2;
-outer_mount_keep = 3;      // mm OD strip left for bolt bearing (like servo_bay)
+inner_tube_outer_r = engine_inner_r + inner_wall_t;
+bolt_z_center = engine_sleeve_len + mid_band_len / 2 + bolt_hole_z_offset;
+mount_r_mid = (inner_tube_outer_r + middle_outer_r - outer_wall_t) / 2;
+shoulder_shell_inner_r = shoulder_outer_r - outer_wall_t;
+mid_shell_inner_r = middle_outer_r - outer_wall_t;
 
-assert(middle_outer_r - engine_inner_r >= wall_thickness,
-       "Fuselage OD too small for engine bore + wall_thickness");
-assert(outer_mount_keep > 0 && outer_mount_keep < wall_thickness,
-       "outer_mount_keep must leave an OD strip thinner than full wall but non-zero");
+assert(mid_band_len > 0,
+       "Increase total_h or coupler_fraction — shoulder longer than coupler_len");
+assert(rib_count >= 3, "Need at least three ribs for stability");
+assert(inner_wall_t >= 1.2 && outer_wall_t >= 1.2, "Walls below 1.2 mm may not print reliably");
+assert(mid_shell_inner_r > inner_tube_outer_r + 1,
+       "Inner tube and outer shell overlap — increase body_tube_od or reduce engine_d");
 
-module coupler_solid() {
-  union() {
-    cylinder(h = engine_sleeve_len, r = middle_outer_r);
-    translate([0, 0, engine_sleeve_len])
-      cylinder(h = mid_band_len, r = middle_outer_r);
-    translate([0, 0, engine_sleeve_len + mid_band_len])
-      cylinder(h = shoulder_coupler_len, r = shoulder_outer_r);
+module tube(h, r_inner, r_outer) {
+  difference() {
+    cylinder(h = h, r = r_outer);
+    translate([0, 0, -0.01])
+      cylinder(h = h + 0.02, r = r_inner);
   }
 }
 
-module engine_bore() {
-  translate([0, 0, -0.01])
-    cylinder(h = total_h + 0.02, r = engine_inner_r);
+module inner_engine_tube() {
+  tube(total_h, engine_inner_r, inner_tube_outer_r);
+}
+
+// Outer shell: full OD sleeve + shoulder coupler (thin wall only).
+module outer_shell() {
+  tube(engine_sleeve_len + mid_band_len, mid_shell_inner_r, middle_outer_r);
+  translate([0, 0, engine_sleeve_len + mid_band_len])
+    tube(shoulder_coupler_len, shoulder_shell_inner_r, shoulder_outer_r);
+}
+
+module rib_spokes(z0, z1, r_outer_attach) {
+  rib_len = r_outer_attach - inner_tube_outer_r;
+  for (a = [0 : 360 / rib_count : 360 - 360 / rib_count])
+    rotate([0, 0, a])
+      translate([inner_tube_outer_r, -rib_width / 2, z0])
+        cube([rib_len, rib_width, z1 - z0]);
 }
 
 module fuselage_bolt_holes() {
@@ -74,11 +93,15 @@ module fuselage_bolt_holes() {
     rotate([0, 0, a])
       translate([mount_r_mid, 0, bolt_z_center])
         rotate([0, 90, 0])
-          cylinder(h = outer_mount_keep + 6, d = bolt_hole_d, center = true);
+          cylinder(h = outer_wall_t + rib_width + 2, d = bolt_hole_d, center = true);
 }
 
 difference() {
-  coupler_solid();
-  engine_bore();
+  union() {
+    inner_engine_tube();
+    outer_shell();
+    rib_spokes(0, engine_sleeve_len + mid_band_len, mid_shell_inner_r);
+    rib_spokes(engine_sleeve_len + mid_band_len, total_h, shoulder_shell_inner_r);
+  }
   fuselage_bolt_holes();
 }
