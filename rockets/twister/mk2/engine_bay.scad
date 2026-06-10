@@ -4,7 +4,8 @@
  * Inner engine tube + thin outer shell joined by radial ribs (no solid annulus).
  * ~80% of height is coupler (OD mid band + shoulder into fuselage); ~20% is
  * the short engine sleeve below — motor bore runs full height through both.
- * Open engine sleeve both ends; four bolt holes through ribs + mid-band shell.
+ * Open engine sleeve at top; 2 mm bottom plate seals annulus for ejection pressure.
+ * Four bolt holes through ribs + mid-band shell.
  *
  * Print: nozzle end down; ribs along Z need no infill in a solid block.
  */
@@ -36,6 +37,7 @@ inner_wall_t = 1.6;        // mm, engine tube wall
 outer_wall_t = 1.6;        // mm, fuselage shell wall
 rib_count = 4;             // radial spokes; aligns with bolt pattern
 rib_width = 2.5;           // mm, tangential width of each rib at mid span
+bottom_plate_t = 2;        // mm, seals annulus between inner/outer tubes at nozzle end
 
 // ----- Fuselage retention (four bolts, 0/90/180/270°)
 bolt_hole_d = 3.2;         // mm, M3 clearance; enlarge if binding in plastic
@@ -88,6 +90,11 @@ module rib_spokes(z0, z1, r_outer_attach) {
         cube([rib_len, rib_width, z1 - z0]);
 }
 
+// Solid annulus at nozzle end — closes rib gaps so ejection charge pressurizes the tube.
+module bottom_pressure_plate() {
+  tube(bottom_plate_t, inner_tube_outer_r, mid_shell_inner_r);
+}
+
 module fuselage_bolt_holes() {
   for (a = [0 : 90 : 270])
     rotate([0, 0, a])
@@ -100,6 +107,7 @@ difference() {
   union() {
     inner_engine_tube();
     outer_shell();
+    bottom_pressure_plate();
     rib_spokes(0, engine_sleeve_len + mid_band_len, mid_shell_inner_r);
     rib_spokes(engine_sleeve_len + mid_band_len, total_h, shoulder_shell_inner_r);
   }
